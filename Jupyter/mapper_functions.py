@@ -11,6 +11,9 @@ warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 
 def plot_global(array, saveflag=False, plot_title ='global_plot', units='na'):
 
+    # Info for colorbar
+    cmin, cmax, cmap = colorbar_info(array)
+    
     # Create the plot
     fig = plt.figure(figsize=(10, 6))
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree(central_longitude=0))
@@ -28,10 +31,10 @@ def plot_global(array, saveflag=False, plot_title ='global_plot', units='na'):
 
     # scatter data
     sc = ax.scatter(array[:, 1], array[:, 2],
-                    c=array[:, 0], s=1, linewidth=0,
+                    c=array[:, 0], s=1, linewidth=0, cmap=cmap, vmin=cmin, vmax=cmax,
                     transform=ccrs.PlateCarree()) 
     # Set the colorbar properties
-    cbar = plt.colorbar(sc, ax=ax, orientation="horizontal", pad=.12, fraction=0.04 ,)
+    cbar = plt.colorbar(sc, ax=ax, orientation="horizontal", pad=.12, fraction=0.04)
     cbar.ax.tick_params(labelsize=6)
     cbar.set_label(units, fontsize=10)
 
@@ -48,8 +51,14 @@ def plot_global(array, saveflag=False, plot_title ='global_plot', units='na'):
      # Show the plot
     plt.show()
 
+
+
+##
 def plot_na(array, saveflag=False, plot_title ='na_plot', units='na'):
 
+    # Info for colorbar
+    cmin, cmax, cmap = colorbar_info(array)
+    
     # Create the plot
     fig = plt.figure(figsize=(10, 6))
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree(central_longitude=0))
@@ -70,7 +79,7 @@ def plot_na(array, saveflag=False, plot_title ='na_plot', units='na'):
 
     # scatter data
     sc = ax.scatter(array[:, 1], array[:, 2],
-                    c=array[:, 0], s=3, linewidth=0,
+                    c=array[:, 0], s=3, linewidth=0, cmap=cmap, vmin=cmin, vmax=cmax,
                     transform=ccrs.PlateCarree()) 
 
     # Set the colorbar properties
@@ -90,3 +99,28 @@ def plot_na(array, saveflag=False, plot_title ='na_plot', units='na'):
 
     # Show the plot
     plt.show()
+
+
+def colorbar_info(array):
+
+    # Compute and print some stats for the data
+    # -----------------------------------------
+    stdev = np.nanstd(array[:,0])  # Standard deviation
+    omean = np.nanmean(array[:, 0]) # Mean of the data
+    datmi = np.nanmin(array[:, 0])  # Min of the data
+    datma = np.nanmax(array[:, 0])  # Max of the data
+    abmm = np.nanmax(np.abs(array[:, 0])) # Abs max of the data
+
+    # Min max for colorbar
+    # --------------------
+    if np.nanmin(array[:, 0]) < 0:
+        cmax = abmm
+        cmin = abmm * -1
+        cmap = 'RdBu'
+    else:
+        cmax = datma
+        cmin = datmi
+        cmap = 'viridis'
+
+    return cmin, cmax, cmap
+

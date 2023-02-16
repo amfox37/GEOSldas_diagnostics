@@ -1,11 +1,15 @@
 import numpy as np
 import os
 
+from pybufrkit.decoder import generate_bufr_message
+from pybufrkit.decoder import Decoder
+from pybufrkit.dataquery import NodePathParser, DataQuerent
+
 def add_numbers(x, y):
     return x + y
 
 
-
+#####################################
 def read_obsfcstana(path, file_name, printflag=False):
 
     # Precision of fortran tag
@@ -150,3 +154,56 @@ def read_obsfcstana(path, file_name, printflag=False):
     print('Total number of obs = ',len(obs_assim))
 
     return date_time, obs_species, obs_tilenum, obs_lon, obs_lat, obs_obs, obs_obsvar, obs_fcst, obs_fcstvar, obs_ana, obs_anavar 
+
+#####################################
+def read_ascat_bufr(path, file_name, printflag=False):
+
+
+    # Get a list of files with a similar name in a directory
+    path = '/Users/amfox/Desktop/ASCAT_EUMETSAT'
+    file_name = 'M02-ASCA-ASCSMO02-NA'
+    file_ext = '.bfr'
+    files = [file for file in os.listdir(path) if file.startswith(file_name) and file.endswith(file_ext)]
+
+    i = 1
+    lat = []
+    lon = []
+    ssom = [] # Surface soil moisture
+    tpcx = [] # Topographic complexity
+    domo = [] # Direction of motion of moving observing platform
+    smpf = [] # Soil moisture processing flag
+    smcf = [] # Soil moisture correction flag
+    alfr = [] # ASCAT land fraction
+    iwfr = [] # Inundation And Wetland Fraction % 0-40-009
+    snoc = [] # snow cover % 0-20-065
+    flsf = [] # frozen land fraction %  0-40-008
+
+    decoder = Decoder()
+
+    # Open each file in turn
+    for file in files:
+        with open(os.path.join(path, file), 'rb') as fr:
+            if printflag:
+                print ('Reading file ', file, '...')
+            
+            # Loop for all messages
+            for bufr_message in generate_bufr_message(decoder, fr.read()):
+                #print ('Reading message number', i, '...')
+                lat = np.append(lat, DataQuerent(NodePathParser()).query(bufr_message, '005001').all_values())
+                lon = np.append(lon, DataQuerent(NodePathParser()).query(bufr_message, '006001').all_values())
+                ssom = np.append(ssom, DataQuerent(NodePathParser()).query(bufr_message, '040001').all_values())
+                # For QC-ing
+                tpcx = np.append(tpcx, DataQuerent(NodePathParser()).query(bufr_message, '040010').all_values())
+                domo = np.append(domo, DataQuerent(NodePathParser()).query(bufr_message, '001012').all_values())
+                smpf = np.append(smpf, DataQuerent(NodePathParser()).query(bufr_message, '040006').all_values())
+                smcf = np.append(smcf, DataQuerent(NodePathParser()).query(bufr_message, '040005').all_values())
+                alfr = np.append(alfr, DataQuerent(NodePathParser()).query(bufr_message, '021166').all_values())
+                iwfr = np.append(iwfr, DataQuerent(NodePathParser()).query(bufr_message, '040009').all_values())
+                snoc = np.append(snoc, DataQuerent(NodePathParser()).query(bufr_message, '020065').all_values())
+                flsf = np.append(flsf, DataQuerent(NodePathParser()).query(bufr_message, '040008').all_values())
+                i = i + 1
+        fr.close    
+        
+    print('Total number of obs = ',len(ssom))
+
+    return lat, lon, ssom, tpcx, domo, smpf, smcf, alfr, iwfr, snoc, flsf
