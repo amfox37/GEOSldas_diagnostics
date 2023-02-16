@@ -3,6 +3,11 @@ import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
+import warnings
+
+from shapely.errors import ShapelyDeprecationWarning
+
+warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 
 def plot_global(array, saveflag=False, plot_title ='global_plot', units='na'):
 
@@ -26,7 +31,7 @@ def plot_global(array, saveflag=False, plot_title ='global_plot', units='na'):
                     c=array[:, 0], s=1, linewidth=0,
                     transform=ccrs.PlateCarree()) 
     # Set the colorbar properties
-    cbar = plt.colorbar(sc, ax=ax, orientation="horizontal", pad=.12, fraction=0.04,)
+    cbar = plt.colorbar(sc, ax=ax, orientation="horizontal", pad=.12, fraction=0.04 ,)
     cbar.ax.tick_params(labelsize=6)
     cbar.set_label(units, fontsize=10)
 
