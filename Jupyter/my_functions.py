@@ -50,7 +50,8 @@ def read_obsfcstana(path, file_name, printflag=False):
 
     # Get a list of files with a similar name in a directory
     file_ext = '.bin'
-    files = [file for file in os.listdir(path) if file.startswith(file_name) and file.endswith(file_ext)]
+    # Use os.walk to recursively traverse all directories and subdirectories under the top-level directory
+    files = [os.path.join(root, file) for root, dirs, files in os.walk(path) for file in files if file.startswith(file_name) and file.endswith(file_ext)]
 
     if printflag:
         print(files)
@@ -160,8 +161,6 @@ def read_ascat_bufr(path, file_name, printflag=False):
 
 
     # Get a list of files with a similar name in a directory
-    path = '/Users/amfox/Desktop/ASCAT_EUMETSAT'
-    file_name = 'M02-ASCA-ASCSMO02-NA'
     file_ext = '.bfr'
     files = [file for file in os.listdir(path) if file.startswith(file_name) and file.endswith(file_ext)]
 
@@ -207,3 +206,37 @@ def read_ascat_bufr(path, file_name, printflag=False):
     print('Total number of obs = ',len(ssom))
 
     return lat, lon, ssom, tpcx, domo, smpf, smcf, alfr, iwfr, snoc, flsf
+
+#####################################
+def read_ascat_bufr_lat_lon(path, file_name, printflag=False):
+
+
+    # Get a list of files with a similar name in a directory
+    file_ext = '.bfr'
+    files = [file for file in os.listdir(path) if file.startswith(file_name) and file.endswith(file_ext)]
+
+    i = 1
+    lat = []
+    lon = []
+    ssom = [] # Surface soil moisture
+
+    decoder = Decoder()
+
+    # Open each file in turn
+    for file in files:
+        with open(os.path.join(path, file), 'rb') as fr:
+            if printflag:
+                print ('Reading file ', file, '...')
+            
+            # Loop for all messages
+            for bufr_message in generate_bufr_message(decoder, fr.read()):
+                #print ('Reading message number', i, '...')
+                lat = np.append(lat, DataQuerent(NodePathParser()).query(bufr_message, '005001').all_values())
+                lon = np.append(lon, DataQuerent(NodePathParser()).query(bufr_message, '006001').all_values())
+                ssom = np.append(ssom, DataQuerent(NodePathParser()).query(bufr_message, '040001').all_values())
+                i = i + 1
+        fr.close    
+        
+    print('Total number of obs = ',len(ssom))
+
+    return lat, lon, ssom
