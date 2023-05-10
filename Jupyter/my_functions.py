@@ -6,7 +6,7 @@ from pybufrkit.decoder import Decoder
 from pybufrkit.dataquery import NodePathParser, DataQuerent
 
 #####################################
-def read_obsfcstana_pentads(path, file_name, printflag=False):
+def read_obsfcstana(path, file_name, printflag=False):
 
     # Precision of fortran tag
     int_precision = 'int32'
@@ -198,7 +198,7 @@ def read_obsfcstana_pentads(path, file_name, printflag=False):
 
     # Get a list of files with a similar name in a directory
     file_ext = '.bin'
-    files = [file for file in os.listdir(path) if file.startswith(file_name) and file.endswith(file_ext)]
+    files = [os.path.join(root, file) for root, dirs, files in os.walk(path) for file in files if file.startswith(file_name) and file.endswith(file_ext)]
 
     if printflag:
         print(files)
