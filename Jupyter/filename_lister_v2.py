@@ -38,7 +38,7 @@ def search_and_copy_files():
                 if os.path.isdir(directory):
                     for filename in os.listdir(directory):
                         if filename.startswith("M01-ASCA-ASCSMO02-NA-"):
-                            timestamp = filename.split("-")[6]
+                            timestamp = filename.split("-")[5]
                             file_year, file_month, file_day, _, _, _ = parse_timestamp(timestamp)
                             if file_year != year or file_month != month or file_day != day:
                                 continue
