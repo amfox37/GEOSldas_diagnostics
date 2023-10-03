@@ -79,7 +79,8 @@ else
 end
 
 inpath  = [ exp_path, '/', exp_run, '/output/', domain ];
-outpath = [ inpath, '/stats/z_score_clim/'   ];
+
+outpath = [ inpath, '/stats/z_score_clim/' ];
 
 % create outpath if it doesn't exist
 if exist(outpath)~=2
@@ -281,9 +282,9 @@ for imonth = 1:length(run_months)
                 end
                 data2D(1,:) = nansum(o_data(i,:,1:w_days),3);
                 data2D(1,:) = data2D(1,:)./N_hscale_window;
-                data2D(2,:) = sqrt(nansum(o_data2(i,:,1:w_days),3) - data2D(1,:).^2)./N_hscale_window;
+                data2D(2,:) = sqrt(nansum(o_data2(i,:,1:w_days),3)./N_hscale_window - data2D(1,:).^2);
                 data2D(3,:) = nansum(m_data(i,:,1:w_days),3)./N_hscale_window;
-                data2D(4,:) = sqrt(nansum(m_data2(i,:,1:w_days),3) - data2D(3,:).^2)./N_hscale_window;
+                data2D(4,:) = sqrt(nansum(m_data2(i,:,1:w_days),3)./N_hscale_window - data2D(3,:).^2);
                 data2D(5,:) = N_hscale_window;
                 data2D([1:Nf],N_hscale_window<Ndata_min) = NaN;
                 data_out(isnan(data_out)) = nodata;
