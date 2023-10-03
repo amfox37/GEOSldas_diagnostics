@@ -21,3 +21,13 @@ def days_in_month(year, month):
         n_days = days_in_month_nonleap[month-1]
     
     return n_days
+
+
+from days_in_month import days_in_month
+
+year = 2022
+month = 2
+
+n_days = days_in_month(year, month)
+
+print(f"There are {n_days} days in {month}/{year}.")
