@@ -144,11 +144,13 @@ lat_out        = ll_lats(j_out)';
 N_gridcells    = length(obsnum);
   
 % initialize output statistics
-o_data   = NaN(N_species, N_gridcells, w_days);
-m_data   = NaN(N_species, N_gridcells, w_days);
-o_data2  = NaN(N_species, N_gridcells, w_days);
-m_data2  = NaN(N_species, N_gridcells, w_days);
-N_data   = NaN(N_species, N_gridcells, w_days);
+o_data_sum  = NaN(N_species, N_gridcells, w_days);
+m_data_sum  = NaN(N_species, N_gridcells, w_days);
+o_data_sum2 = NaN(N_species, N_gridcells, w_days);
+m_data_sum2 = NaN(N_species, N_gridcells, w_days);
+m_data_min  = NaN(N_species, N_gridcells, w_days);
+m_data_max  = NaN(N_species, N_gridcells, w_days);
+N_data      = NaN(N_species, N_gridcells, w_days);
 
 data_out = NaN(N_species, Nf, N_gridcells, N_pentads);
 data2D   = NaN(Nf, N_gridcells);
@@ -241,10 +243,12 @@ for imonth = 1:length(run_months)
                             [~, obs_idx] = ismember([i_idx, j_idx], [i_out, j_out], 'rows');
                             obs_i = obsnum(obs_idx);
 
-                            o_data(scnt, obs_i, count) = nansum([o_data(scnt, obs_i, count); obs_obs_i']);
-                            m_data(scnt, obs_i, count) = nansum([m_data(scnt, obs_i, count); obs_fcst_i']);
-                            o_data2(scnt, obs_i, count) = nansum([o_data2(scnt, obs_i, count); obs_obs_i'.^2]);
-                            m_data2(scnt, obs_i, count) = nansum([m_data2(scnt, obs_i, count); obs_fcst_i'.^2]);
+                            o_data_sum(scnt, obs_i, count) = nansum([o_data_sum(scnt, obs_i, count); obs_obs_i']);
+                            m_data_sum(scnt, obs_i, count) = nansum([m_data_sum(scnt, obs_i, count); obs_fcst_i']);
+                            o_data_sum2(scnt, obs_i, count) = nansum([o_data_sum2(scnt, obs_i, count); obs_obs_i'.^2]);
+                            m_data_sum2(scnt, obs_i, count) = nansum([m_data_sum2(scnt, obs_i, count); obs_fcst_i'.^2]);
+                            m_data_min(scnt, obs_i, count) = nanmin([m_data_min(scnt, obs_i, count); obs_fcst_i']);
+                            m_data_max(scnt, obs_i, count) = nanmax([m_data_max(scnt, obs_i, count); obs_fcst_i']);
                             N_data(scnt, obs_i, count) = nansum([N_data(scnt, obs_i, count); ~isnan(obs_obs_i)']);
                         end
                     end
@@ -265,8 +269,8 @@ for imonth = 1:length(run_months)
             % At the end of each day, collect the obs and fcst of the last
             % w_day period, and write out a statistics-file at [w_day - floor(w_day/2)]
 
-            o_data(abs(o_data - nodata) <= nodata_tol) = NaN;
-            m_data(abs(o_data - nodata) <= nodata_tol) = NaN;
+            o_data_sum(abs(o_data_sum - nodata) <= nodata_tol) = NaN;
+            m_data_sum(abs(m_data_sum - nodata) <= nodata_tol) = NaN;
 
             % data_out = zeros(N_out_fields,1:N_tiles,N_angle);
         
@@ -275,14 +279,14 @@ for imonth = 1:length(run_months)
                 if w_days == 95
                     N_hscale_inner_window = nansum(N_data(i,:,41:55),3);
                 end
-                data2D(1,:) = nansum(o_data(i,:,1:w_days),3);
+                data2D(1,:) = nansum(o_data_sum(i,:,1:w_days),3);
                 data2D(1,:) = data2D(1,:)./N_hscale_window;
-                data2D(2,:) = sqrt(nansum(o_data2(i,:,1:w_days),3)./N_hscale_window - data2D(1,:).^2);
-                data2D(3,:) = nansum(m_data(i,:,1:w_days),3)./N_hscale_window;
-                data2D(4,:) = sqrt(nansum(m_data2(i,:,1:w_days),3)./N_hscale_window - data2D(3,:).^2);
+                data2D(2,:) = sqrt(nansum(o_data_sum2(i,:,1:w_days),3)./N_hscale_window - data2D(1,:).^2);
+                data2D(3,:) = nansum(m_data_sum(i,:,1:w_days),3)./N_hscale_window;
+                data2D(4,:) = sqrt(nansum(m_data_sum2(i,:,1:w_days),3)./N_hscale_window - data2D(3,:).^2);
                 data2D(5,:) = N_hscale_window;
-                data2D(6,:) = nanmin((m_data./N_data),[],3);  % Want to use minimum mean daily value
-                data2D(7,:) = nanmin((m_data./N_data),[],3); % Want to use maximum mean daily value
+                data2D(6,:) = nanmin(m_data_min(i,:,1:w_days),[],3);  % Want to use minimum mean daily value
+                data2D(7,:) = nanmax(m_data_max(i,:,1:w_days),[],3);  % Want to use maximum mean daily value
 
                 data2D([1:Nf],N_hscale_window<Ndata_min) = NaN;
 
@@ -335,15 +339,15 @@ for imonth = 1:length(run_months)
                         write_netcdf_file_2D_grid(fname_out, i_out, j_out, lon_out, lat_out, inc_angle, data2D, int_Asc, pentad, start_time, end_time, overwrite, Nf, write_ind_latlon, 'scaling', obsnum)
                     end
                 end
-                o_data(:,:,1:w_days-1)  = o_data(:,:,2:w_days);
-                m_data(:,:,1:w_days-1)  = m_data(:,:,2:w_days);
-                o_data2(:,:,1:w_days-1) = o_data2(:,:,2:w_days);
-                m_data2(:,:,1:w_days-1) = m_data2(:,:,2:w_days);
+                o_data_sum(:,:,1:w_days-1)  = o_data_sum(:,:,2:w_days);
+                m_data_sum(:,:,1:w_days-1)  = m_data_sum(:,:,2:w_days);
+                o_data_sum2(:,:,1:w_days-1) = o_data_sum2(:,:,2:w_days);
+                m_data_sum2(:,:,1:w_days-1) = m_data_sum2(:,:,2:w_days);
                 N_data(:,:,1:w_days-1)  = N_data(:,:,2:w_days);
-                o_data(:,:,w_days)  = NaN;
-                m_data(:,:,w_days)  = NaN;
-                o_data2(:,:,w_days) = NaN;
-                m_data2(:,:,w_days) = NaN;
+                o_data_sum(:,:,w_days)  = NaN;
+                m_data_sum(:,:,w_days)  = NaN;
+                o_data_sum2(:,:,w_days) = NaN;
+                m_data_sum2(:,:,w_days) = NaN;
                 N_data(:,:,w_days)  = NaN;
                 data2D = NaN+0.0.*data2D;
             end              
