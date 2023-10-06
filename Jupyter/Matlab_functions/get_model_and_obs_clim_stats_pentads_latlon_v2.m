@@ -59,16 +59,16 @@ function [] = get_model_and_obs_clim_stats_pentads_latlon_v2( species_names,    
 
 nodata = -9999;
 nodata_tol = 1e-4;
-N_data_min = w_days/10;
-no_data_stats = -9999;
 overwrite = 1;
 Nf = 5;
 N_pentads = 73;
 write_ind_latlon = 'latlon_id';
-store_all_025_latlon = 0;
 print_each_DOY = 0;
 print_each_pentad = 1;
 print_all_pentads = 1;
+
+int_Asc = 3;
+inc_angle = -9999;
 
 disp('ASSUMING ACAT observations/undefined observation grid');
 
@@ -83,18 +83,15 @@ inpath  = [ exp_path, '/', exp_run, '/output/', domain ];
 outpath = [ inpath, '/stats/z_score_clim/' ];
 
 % create outpath if it doesn't exist
-if exist(outpath)~=2
-  eval(['!mkdir -p ', outpath]);
-end
-
-% create outpath if it doesn't exist
 if ~exist(outpath, 'dir')
     mkdir(outpath);
 end
 
 % assemble output file name
-mi_m = min(run_months);
-ma_m = max(run_months);
+ind  = find(start_year == min(start_year));
+mi_m = min(run_months(ind));
+ind  = find(end_year == max(end_year));
+ma_m = max(run_months(ind)) 
 
 D(1) = 1;
 P(1) = 1;
@@ -109,7 +106,7 @@ if run_months(1) ~= run_months(end) && run_months(2) ~= run_months(end)
     disp('WARNING: incomplete pentad-windows; loop through additional months to get complete pentads');
 end
 
-fname_out_base = fullfile(outpath, prefix, ...
+fname_out_base_d = fullfile(outpath, prefix, ...
     [num2str(min(start_year)), '_doy', num2str(D(1)), '_', ...
     num2str(max(end_year)), '_doy', num2str(D(2)), ...
     '_W_', num2str(w_days), 'd_Nmin_', num2str(Ndata_min)]);
@@ -288,18 +285,19 @@ for imonth = 1:length(run_months)
                 data2D(5,:) = N_hscale_window;
                 data2D([1:Nf],N_hscale_window<Ndata_min) = NaN;
                 data_out(isnan(data_out)) = nodata;
-                if combine_species_stats
-                    fname_out_base_s = [fname_out_base(1:strfind(fname_out_base, 'z_score_clim//')-1) 'z_score_clim/combined_', fname_out_base(strfind(fname_out_base, 'z_score_clim//')+length('z_score_clim//'):end)];
-                else
-                    fname_out_base_s = [fname_out_base(1:strfind(fname_out_base, 'z_score_clim//')-1) 'z_score_clim/', char(species_names(i)),'_', fname_out_base(strfind(fname_out_base, 'z_score_clim//')+length('z_score_clim//'):end)];
-                end
+
                 DOY = augment_date_time(-floor(w_days*(24*60*60)/2.0), end_time).dofyr;
                 if(is_leap_year(end_time.year) && DOY>=59)
                     DOY = DOY-1;
                     error('This code should never hit a leap year');
                 end
-                fname_out = [fname_out_base_s, '_DOY', num2str(DOY,'%3.3d'), '.nc4'];
+
                 if print_each_DOY
+                    if combine_species_stats
+                        fname_out = [fname_out_base_d, '_spALL_DOY', num2str(DOY,'%3.3d'), '.nc4'];
+                    else
+                        fname_out = [fname_out_base_d,'_sp', char(species_names(i)),'_DOY', num2str(DOY,'%3.3d'), '.nc4'];
+                    end
                     if (exist(fname_out)==2 && overwrite)
                         disp(['output file exists. overwriting', fname_out])
                     elseif (exist(fname_out)==2 && ~overwrite) 
@@ -309,26 +307,30 @@ for imonth = 1:length(run_months)
                     else
                         disp(['creating ', fname_out])
                     end
-                    write_netcdf_file_2D_grid(fname_out, i_out, j_out, lon_out, lat_out, inc_angle, data2D, int_Asc, pentad, start_time, end_time, overwrite, Nf, write_ind_latlon, 'scaling', obsnum)
-                else
+                    write_netcdf_file_2D_grid_v2(fname_out, i_out, j_out, lon_out, lat_out, inc_angle, data2D, int_Asc, pentad, start_time, end_time, overwrite, Nf, write_ind_latlon, 'scaling', obsnum)
+                end 
+
+                if mod((DOY + 2),5) == 0
                     pentad = (DOY + 2)/5;
-                    if mod((DOY + 2),5) == 0
-                        data_out(i,:,:,pentad) = data2D;
-                        start_time_p(pentad) = start_time;
-                        end_time_p(pentad) = end_time;
-                        if print_each_pentad
-                            fname_out = [fname_out_base_p, '_p', num2str(pentad,'%2.2d'), '.nc4'];
-                            if (exist(fname_out)==2 && overwrite)
-                                disp(['output file exists. overwriting', fname_out])
-                            elseif (exist(fname_out)==2 && ~overwrite) 
-                                disp(['output file exists. not overwriting. returning'])
-                                disp(['writing ', fname_out])
-                                return
-                            else
-                                disp(['creating ', fname_out])
-                            end
-                            write_netcdf_file_2D_grid(fname_out, i_out, j_out, lon_out, lat_out, inc_angle, data2D, int_Asc, pentad, start_time, end_time, overwrite, Nf, write_ind_latlon, 'scaling', obsnum)
+                    data_out(i,:,:,pentad) = data2D;
+                    start_time_p(pentad) = start_time;
+                    end_time_p(pentad) = end_time;
+                    if print_each_pentad
+                        if combine_species_stats
+                            fname_out = [fname_out_base_p, '_spALL_p', num2str(pentad,'%2.2d'), '.nc4'];
+                        else
+                            fname_out = [fname_out_base_p, '_sp', char(species_names(i)),'_p', num2str(pentad,'%2.2d'), '.nc4'];
                         end
+                        if (exist(fname_out)==2 && overwrite)
+                            disp(['output file exists. overwriting', fname_out])
+                        elseif (exist(fname_out)==2 && ~overwrite) 
+                            disp(['output file exists. not overwriting. returning'])
+                            disp(['writing ', fname_out])
+                            return
+                        else
+                            disp(['creating ', fname_out])
+                        end
+                        write_netcdf_file_2D_grid_v2(fname_out, i_out, j_out, lon_out, lat_out, inc_angle, data2D, int_Asc, pentad, start_time, end_time, overwrite, Nf, write_ind_latlon, 'scaling', obsnum)
                     end
                 end
                 o_data(:,:,1:w_days-1)  = o_data(:,:,2:w_days);
@@ -350,14 +352,14 @@ end % month
 if print_all_pentads
     for i = 1:N_species
         data_o = squeeze(data_out(i,:,:,:));
-        
-         if combine_species_stats % We are  combining stats
-             fname_out = [fname_out_base(1:startidx-1) 'z_score_clim/combined_all_pentads_', fname_out_base(endidx:end),'.nc4'];
-         else
-             fname_out = [fname_out_base(1:startidx-1) 'z_score_clim/', char(species_names(i)),'_all_pentads_', fname_out_base(endidx:end),'.nc4'];
-         end
 
-        write_netcdf_file_2D_grid(fname_out, i_out, j_out, lon_out, lat_out, ...
+        if combine_species_stats
+            fname_out = [fname_out_base_d, '_spALL_all_pentads.nc4'];
+        else
+            fname_out = [fname_out_base_d,'_sp', char(species_names(i)),'_all_pentads.nc4'];
+        end
+
+        write_netcdf_file_2D_gri_v2(fname_out, i_out, j_out, lon_out, lat_out, ...
                   inc_angle, data_o, int_Asc, [1:73], ...  
                   start_time_p, end_time_p, overwrite, ...
                   Nf, write_ind_latlon, 'scaling',...
