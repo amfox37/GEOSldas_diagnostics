@@ -67,10 +67,13 @@ print_each_DOY = 0;
 print_each_pentad = 1;
 print_all_pentads = 1;
 
+resol = 0.25;
+
 int_Asc = 3;
 inc_angle = -9999;
 
 disp('ASSUMING ACAT observations/undefined observation grid');
+disp(['Calculating scaling parameters on grid with resolution = ', resol, ' degrees']);
 
 if combine_species_stats
     N_species = 1;
@@ -88,9 +91,9 @@ if ~exist(outpath, 'dir')
 end
 
 % assemble output file name
-ind  = find(start_year == min(start_year));
+ind  = start_year == min(start_year);
 mi_m = min(run_months(ind));
-ind  = find(end_year == max(end_year));
+ind  = end_year == max(end_year);
 ma_m = max(run_months(ind));
 
 D(1) = 1;
@@ -119,14 +122,20 @@ fname_out_base_p = [outpath, '/', prefix, ...
 %======================================================
 
 % Define 1/4 degree lat/lon grid
-n_lon   = 1440;
-n_lat   = 720;
-ll_lon  = -180;
-ll_lat  = -90;
-d_lon   = 0.25;
-d_lat   = 0.25;
-ll_lons = linspace(-180, 179.75, n_lon);
-ll_lats = linspace(-90, 89.75, n_lat);
+% Define lower-left corner coordinates and grid cell size
+ll_lon = -180;
+ll_lat = -90;
+
+d_lon = resol;
+d_lat = resol;
+
+% Calculate number of longitude and latitude grid cells
+n_lon = round(360/ d_lon);
+n_lat = round(180 / d_lat);
+
+% Calculate longitude and latitude values for the grid
+ll_lons = linspace(ll_lon, ll_lon + (n_lon-1)*d_lon, n_lon);
+ll_lats = linspace(ll_lat, ll_lat + (n_lat-1)*d_lat, n_lat);
 
 % Create grid index
 obsnum         = (1:n_lon*n_lat)';
