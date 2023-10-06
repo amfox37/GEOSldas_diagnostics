@@ -1,6 +1,7 @@
 clear
 
-addpath('../../shared/matlab/');
+% addpath('../../shared/matlab/');
+addpath('/discover/nobackup/amfox/current_GEOSldas/GEOSldas/src/Applications/LDAS_App/util/shared/matlab')
 
 run_months = [1:12 1:4];
 exp_path = '/discover/nobackup/amfox/Experiments/OLv7_M36_ascat';

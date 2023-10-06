@@ -90,7 +90,7 @@ if ~exist(outpath, 'dir')
 end
 
 % assemble output file name
-ind  = find(start_year == min(start_year));
+ind  = start_year == min(start_year);
 mi_m = min(run_months(ind));
 ind  = end_year == max(end_year);
 ma_m = max(run_months(ind));
