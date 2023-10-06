@@ -37,7 +37,7 @@ if combine_species_stats
 end
 
 if (exist('convert_grid','var'))
-    get_model_and_obs_clim_stats_pentads_latlon(species_names, run_months, exp_path, exp_run{1}, domain, start_year, end_year, dt_assim, t0_assim, species, combine_species_stats, obs_param, hscale, w_days, Ndata_min, prefix_out, convert_grid);
+    get_model_and_obs_clim_stats_pentads_latlon_v2(species_names, run_months, exp_path, exp_run{1}, domain, start_year, end_year, dt_assim, t0_assim, species, combine_species_stats, obs_param, hscale, w_days, Ndata_min, prefix_out, convert_grid);
 else
-    get_model_and_obs_clim_stats_pentads_latlon(species_names, run_months, exp_path, exp_run{1}, domain, start_year, end_year, dt_assim, t0_assim, species, combine_species_stats, obs_param, hscale, w_days, Ndata_min, prefix_out);
+    get_model_and_obs_clim_stats_pentads_latlon_v2(species_names, run_months, exp_path, exp_run{1}, domain, start_year, end_year, dt_assim, t0_assim, species, combine_species_stats, obs_param, hscale, w_days, Ndata_min, prefix_out);
 end

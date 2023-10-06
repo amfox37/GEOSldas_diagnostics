@@ -80,7 +80,7 @@ end
 
 inpath  = [ exp_path, '/', exp_run, '/output/', domain ];
 
-outpath = [ inpath, '/stats/z_score_clim/' ];
+outpath = [ inpath, '/stats/z_score_clim_db' ];
 
 % create outpath if it doesn't exist
 if ~exist(outpath, 'dir')
@@ -91,7 +91,7 @@ end
 ind  = find(start_year == min(start_year));
 mi_m = min(run_months(ind));
 ind  = find(end_year == max(end_year));
-ma_m = max(run_months(ind)) 
+ma_m = max(run_months(ind));
 
 D(1) = 1;
 P(1) = 1;
@@ -106,15 +106,15 @@ if run_months(1) ~= run_months(end) && run_months(2) ~= run_months(end)
     disp('WARNING: incomplete pentad-windows; loop through additional months to get complete pentads');
 end
 
-fname_out_base_d = fullfile(outpath, prefix, ...
-    [num2str(min(start_year)), '_doy', num2str(D(1)), '_', ...
+fname_out_base_d = [outpath,  '/', prefix, ...
+    num2str(min(start_year)), '_doy', num2str(D(1)), '_', ...
     num2str(max(end_year)), '_doy', num2str(D(2)), ...
-    '_W_', num2str(w_days), 'd_Nmin_', num2str(Ndata_min)]);
+    '_W_', num2str(w_days), 'd_Nmin_', num2str(Ndata_min)];
 
-fname_out_base_p = fullfile(outpath, prefix, ...
-    [num2str(min(start_year)), '_p', num2str(P(1)), '_', ...
+fname_out_base_p = [outpath, '/', prefix, ...
+    num2str(min(start_year)), '_p', num2str(P(1)), '_', ...
     num2str(max(end_year)), '_p', num2str(P(2)), ...
-    '_W_', num2str(round(w_days/5)), 'p_Nmin_', num2str(Ndata_min)]);
+    '_W_', num2str(round(w_days/5)), 'p_Nmin_', num2str(Ndata_min)];
 
 %======================================================
 
@@ -307,7 +307,7 @@ for imonth = 1:length(run_months)
                     else
                         disp(['creating ', fname_out])
                     end
-                    write_netcdf_file_2D_grid_v2(fname_out, i_out, j_out, lon_out, lat_out, inc_angle, data2D, int_Asc, pentad, start_time, end_time, overwrite, Nf, write_ind_latlon, 'scaling', obsnum)
+                    write_netcdf_file_2D_grid(fname_out, i_out, j_out, lon_out, lat_out, inc_angle, data2D, int_Asc, pentad, start_time, end_time, overwrite, Nf, write_ind_latlon, 'scaling', obsnum)
                 end 
 
                 if mod((DOY + 2),5) == 0
@@ -330,7 +330,7 @@ for imonth = 1:length(run_months)
                         else
                             disp(['creating ', fname_out])
                         end
-                        write_netcdf_file_2D_grid_v2(fname_out, i_out, j_out, lon_out, lat_out, inc_angle, data2D, int_Asc, pentad, start_time, end_time, overwrite, Nf, write_ind_latlon, 'scaling', obsnum)
+                        write_netcdf_file_2D_grid(fname_out, i_out, j_out, lon_out, lat_out, inc_angle, data2D, int_Asc, pentad, start_time, end_time, overwrite, Nf, write_ind_latlon, 'scaling', obsnum)
                     end
                 end
                 o_data(:,:,1:w_days-1)  = o_data(:,:,2:w_days);
@@ -359,7 +359,7 @@ if print_all_pentads
             fname_out = [fname_out_base_d,'_sp', char(species_names(i)),'_all_pentads.nc4'];
         end
 
-        write_netcdf_file_2D_gri_v2(fname_out, i_out, j_out, lon_out, lat_out, ...
+        write_netcdf_file_2D_grid(fname_out, i_out, j_out, lon_out, lat_out, ...
                   inc_angle, data_o, int_Asc, [1:73], ...  
                   start_time_p, end_time_p, overwrite, ...
                   Nf, write_ind_latlon, 'scaling',...
