@@ -72,7 +72,7 @@ int_Asc = 3;
 inc_angle = -9999;
 
 disp('ASSUMING ACAT observations/undefined observation grid');
-disp(['Calculating scaling parameters on grid with resolution = ', resol, ' degrees']);
+disp(['Calculating scaling parameters on grid with resolution = ', num2str(resol) , ' degrees']);
 
 if combine_species_stats
     N_species = 1;
@@ -142,16 +142,6 @@ obsnum         = (1:n_lon*n_lat)';
 lon_out        = ll_lons(i_out)';
 lat_out        = ll_lats(j_out)';
 N_gridcells    = length(obsnum);
-
-% Not sure about this as aren't centering lat/lons
-if hscale > 0
-    for i = 1:N_gridcells
-        tmp_sq_distance = (lon_out - lon_out(i)).^2 + (lat_out - lat_out(i)).^2;
-        hscale_ind{i} = find(tmp_sq_distance <= hscale^2);
-    end
-else 
-    hscale_ind = num2cell(obsnum);
-end
   
 % initialize output statistics
 o_data   = NaN(N_species, N_gridcells, w_days);
@@ -291,8 +281,8 @@ for imonth = 1:length(run_months)
                 data2D(3,:) = nansum(m_data(i,:,1:w_days),3)./N_hscale_window;
                 data2D(4,:) = sqrt(nansum(m_data2(i,:,1:w_days),3)./N_hscale_window - data2D(3,:).^2);
                 data2D(5,:) = N_hscale_window;
-                data2D(6,:) = nanmin(m_data(i,:,1:w_days),[],3);
-                data2D(7,:) = nanmax(m_data(i,:,1:w_days),[],3);
+                data2D(6,:) = nanmin((m_data./N_data),[],3);  % Want to use minimum mean daily value
+                data2D(7,:) = nanmin((m_data./N_data),[],3); % Want to use maximum mean daily value
 
                 data2D([1:Nf],N_hscale_window<Ndata_min) = NaN;
 
@@ -362,10 +352,6 @@ for imonth = 1:length(run_months)
 end % month
 
 % Find the absolute minimum and maximum of the model data over the whole time period
-
-min_m_data = squeeze(data_out(:,6,:,:);
-max_m_data = squeeze(data_out(:,7,:,:);
-
 
 if print_all_pentads
     for i = 1:N_species
