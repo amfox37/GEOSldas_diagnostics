@@ -357,6 +357,8 @@ end % month
 
 % Find the absolute minimum and maximum of the model data over the whole time period
 
+save('data_out_M36_ASCAT_04012015_03312021.mat','data_out', '-v7.3')
+
 if print_all_pentads
     for i = 1:N_species
         data_o = squeeze(data_out(i,:,:,:));
