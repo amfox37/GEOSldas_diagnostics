@@ -284,10 +284,10 @@ for imonth = 1:length(run_months)
                 data2D(2,:) = sqrt(nansum(o_data_sum2(i,:,1:w_days),3)./N_hscale_window - data2D(1,:).^2);
                 data2D(3,:) = nansum(m_data_sum(i,:,1:w_days),3)./N_hscale_window;
                 data2D(4,:) = sqrt(nansum(m_data_sum2(i,:,1:w_days),3)./N_hscale_window - data2D(3,:).^2);
-                data2D(5,:) = N_hscale_window;
+                data2D(5,:) = N_hscale_window
                 data2D(6,:) = nanmin(m_data_min(i,:,1:w_days),[],3);  % Want to use minimum mean daily value
                 data2D(7,:) = nanmax(m_data_max(i,:,1:w_days),[],3);  % Want to use maximum mean daily value
-
+                
                 data2D([1:Nf],N_hscale_window<Ndata_min) = NaN;
 
                 data_out(isnan(data_out)) = nodata; % not sure why this here
