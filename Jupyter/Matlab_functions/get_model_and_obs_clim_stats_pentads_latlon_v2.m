@@ -343,11 +343,15 @@ for imonth = 1:length(run_months)
                 m_data_sum(:,:,1:w_days-1)  = m_data_sum(:,:,2:w_days);
                 o_data_sum2(:,:,1:w_days-1) = o_data_sum2(:,:,2:w_days);
                 m_data_sum2(:,:,1:w_days-1) = m_data_sum2(:,:,2:w_days);
+                m_data_min(:,:,1:w_days-1) = m_data_min(:,:,2:w_days);
+                m_data_max(:,:,1:w_days-1) = m_data_max(:,:,2:w_days);
                 N_data(:,:,1:w_days-1)  = N_data(:,:,2:w_days);
                 o_data_sum(:,:,w_days)  = NaN;
                 m_data_sum(:,:,w_days)  = NaN;
                 o_data_sum2(:,:,w_days) = NaN;
                 m_data_sum2(:,:,w_days) = NaN;
+                m_data_min(:,:,w_days) = NaN;
+                m_data_max(:,:,w_days) = NaN;
                 N_data(:,:,w_days)  = NaN;
                 data2D = NaN+0.0.*data2D;
             end              
