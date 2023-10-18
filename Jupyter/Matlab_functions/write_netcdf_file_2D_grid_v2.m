@@ -82,42 +82,86 @@ dimid_lat = netcdf.defDim(ncid, 'lat', N_lat);
 % define variables
 varid_version = netcdf.defVar(ncid, 'version', int_precision, []);
 varid_ll_lon = netcdf.defVar(ncid, 'll_lon', float_precision, []);
+netcdf.putAtt(ncid, varid_ll_lon, 'standard_name','longitude of lower left corner');
+netcdf.putAtt(ncid, varid_ll_lon, 'long_name','longitude of lower left corner');
+netcdf.putAtt(ncid, varid_ll_lon, 'units','degrees_east');
+netcdf.putAtt(ncid, varid_ll_lon, 'axis','X');
 varid_ll_lat = netcdf.defVar(ncid, 'll_lat', float_precision, []);
+netcdf.putAtt(ncid, varid_ll_lat, 'standard_name','latitude of lower left corner');
+netcdf.putAtt(ncid, varid_ll_lat, 'long_name','latitude of lower left corner');
+netcdf.putAtt(ncid, varid_ll_lat, 'units','degrees_north');
+netcdf.putAtt(ncid, varid_ll_lat, 'axis','Y');
 varid_d_lon = netcdf.defVar(ncid, 'd_lon', float_precision, []);
-varid_d_lat = netcdf.defVar(ncid, 'd_lat', float_precision, []); 
-
+netcdf.putAtt(ncid, varid_d_lon, 'standard_name','longitude grid spacing');
+netcdf.putAtt(ncid, varid_d_lon, 'long_name','longitude grid spacing');
+netcdf.putAtt(ncid, varid_d_lon, 'units','degrees');
+netcdf.putAtt(ncid, varid_d_lon, 'axis','X');
+varid_d_lat = netcdf.defVar(ncid, 'd_lat', float_precision, []);
+netcdf.putAtt(ncid, varid_d_lat, 'standard_name','latitude grid spacing');
+netcdf.putAtt(ncid, varid_d_lat, 'long_name','latitude grid spacing');
+netcdf.putAtt(ncid, varid_d_lat, 'units','degrees');
+netcdf.putAtt(ncid, varid_d_lat, 'axis','Y');
 varid_pentad = netcdf.defVar(ncid, 'pentad', int_precision, [dimid_pentad]);
-
+netcdf.putAtt(ncid, varid_pentad, 'standard_name','pentad');
+netcdf.putAtt(ncid, varid_pentad, 'long_name','pentad');
+netcdf.putAtt(ncid, varid_pentad, 'units','1');
+netcdf.putAtt(ncid, varid_pentad, 'axis','T');
 varid_start_time = netcdf.defVar(ncid, 'start_time', float_precision, [dimid_pentad]);
 netcdf.putAtt(ncid, varid_start_time, 'standard_name','start time');
 netcdf.putAtt(ncid, varid_start_time, 'long_name','start time');
 netcdf.putAtt(ncid, varid_start_time, 'axis','T');
 netcdf.putAtt(ncid, varid_start_time, 'units','days since 1950-01-01 00:00:00.0 +0000');
-
 varid_end_time = netcdf.defVar(ncid, 'end_time',float_precision, [dimid_pentad]);
 netcdf.putAtt(ncid, varid_end_time, 'standard_name','end time');
 netcdf.putAtt(ncid, varid_end_time, 'long_name','end time');
 netcdf.putAtt(ncid, varid_end_time, 'axis','T');
 netcdf.putAtt(ncid, varid_end_time, 'units','days since 1950-01-01 00:00:00.0 +0000');
-
 varid_lon = netcdf.defVar(ncid, 'lon', float_precision, [dimid_lon]);
+netcdf.putAtt(ncid, varid_lon, 'standard_name','longitude');
+netcdf.putAtt(ncid, varid_lon, 'long_name','loswer left longitude of gridcell');
+netcdf.putAtt(ncid, varid_lon, 'units','degrees_east');
+netcdf.putAtt(ncid, varid_lon, 'axis','X');
 varid_lat = netcdf.defVar(ncid, 'lat', float_precision, [dimid_lat]);
-
+netcdf.putAtt(ncid, varid_lat, 'standard_name','latitude');
+netcdf.putAtt(ncid, varid_lat, 'long_name','loswer left latitude of gridcell');
+netcdf.putAtt(ncid, varid_lat, 'units','degrees_north');
+netcdf.putAtt(ncid, varid_lat, 'axis','Y');
 varid_om = netcdf.defVar(ncid, 'o_mean', float_precision, [dimid_lat dimid_lon dimid_pentad]);
+netcdf.putAtt(ncid, varid_om, 'standard_name','observation mean');
+netcdf.putAtt(ncid, varid_om, 'long_name','Observation mean for pentad calculated over all years for window length');
+netcdf.putAtt(ncid, varid_om, 'units','Degree of saturation (0-1)');
 varid_ov = netcdf.defVar(ncid, 'o_std', float_precision, [dimid_lat dimid_lon dimid_pentad]);
+netcdf.putAtt(ncid, varid_ov, 'standard_name','observation standard deviation');
+netcdf.putAtt(ncid, varid_ov, 'long_name','Observation standard deviation for pentad calculated over all years for window length');
+netcdf.putAtt(ncid, varid_ov, 'units','Degree of saturation (0-1)');
 varid_mm = netcdf.defVar(ncid, 'm_mean', float_precision, [dimid_lat dimid_lon dimid_pentad]);
+netcdf.putAtt(ncid, varid_mm, 'standard_name','model mean');
+netcdf.putAtt(ncid, varid_mm, 'long_name','Model mean for pentad calculated over all years for window length');
+netcdf.putAtt(ncid, varid_mm, 'units','Surface soil moisture (m^3 m^-3)'); 
 varid_mv =  netcdf.defVar(ncid, 'm_std', float_precision, [dimid_lat dimid_lon dimid_pentad]);
+netcdf.putAtt(ncid, varid_mv, 'standard_name','model standard deviation');
+netcdf.putAtt(ncid, varid_mv, 'long_name','Model standard deviation for pentad calculated over all years for window length');
+netcdf.putAtt(ncid, varid_mv, 'units','Surface soil moisture (m^3 m^-3)');
 varid_mi =  netcdf.defVar(ncid, 'm_min', float_precision, [dimid_lat dimid_lon]);
+netcdf.putAtt(ncid, varid_mi, 'standard_name','model minimum');
+netcdf.putAtt(ncid, varid_mi, 'long_name','Model minimum calculated over all years');
+netcdf.putAtt(ncid, varid_mi, 'units','Surface soil moisture (m^3 m^-3)');
 varid_ma =  netcdf.defVar(ncid, 'm_max', float_precision, [dimid_lat dimid_lon]);
+netcdf.putAtt(ncid, varid_ma, 'standard_name','model maximum');
+netcdf.putAtt(ncid, varid_ma, 'long_name','Model maximum calculated over all years');
+netcdf.putAtt(ncid, varid_ma, 'units','Surface soil moisture (m^3 m^-3)');
 varid_ndata =  netcdf.defVar(ncid, 'n_data', float_precision, [dimid_lat dimid_lon dimid_pentad]);
+netcdf.putAtt(ncid, varid_ndata, 'standard_name','number of data points');
+netcdf.putAtt(ncid, varid_ndata, 'long_name','Number of data points for pentad calculated over all years for window length');
+netcdf.putAtt(ncid, varid_ndata, 'units','1');
 
 % end define mode
 netcdf.endDef(ncid);
 
 % write data
 netcdf.putVar(ncid, varid_pentad, pentad);
-%netcdf.putVar(ncid, varid_start_time, tmp_start_time);
-%netcdf.putVar(ncid, varid_end_time, tmp_end_time);
+netcdf.putVar(ncid, varid_start_time, tmp_start_time);
+netcdf.putVar(ncid, varid_end_time, tmp_end_time);
 
 netcdf.putVar(ncid, varid_lon, ll_lons);
 netcdf.putVar(ncid, varid_lat, ll_lats);
@@ -168,6 +212,3 @@ end
 netcdf.close(ncid);
 
 end
-
-
-
