@@ -247,8 +247,8 @@ for imonth = 1:length(run_months)
                             m_data_sum(scnt, obs_i, count) = nansum([m_data_sum(scnt, obs_i, count); obs_fcst_i']);
                             o_data_sum2(scnt, obs_i, count) = nansum([o_data_sum2(scnt, obs_i, count); obs_obs_i'.^2]);
                             m_data_sum2(scnt, obs_i, count) = nansum([m_data_sum2(scnt, obs_i, count); obs_fcst_i'.^2]);
-                            m_data_min(scnt, obs_i, count) = nanmin([m_data_min(scnt, obs_i, count); obs_fcst_i']);
-                            m_data_max(scnt, obs_i, count) = nanmax([m_data_max(scnt, obs_i, count); obs_fcst_i']);
+                            m_data_min(scnt, obs_i, count) = min([m_data_min(scnt, obs_i, count); obs_fcst_i']);
+                            m_data_max(scnt, obs_i, count) = max([m_data_max(scnt, obs_i, count); obs_fcst_i']);
                             N_data(scnt, obs_i, count) = nansum([N_data(scnt, obs_i, count); ~isnan(obs_obs_i)']);
                         end
                     end
@@ -284,9 +284,9 @@ for imonth = 1:length(run_months)
                 data2D(2,:) = sqrt(nansum(o_data_sum2(i,:,1:w_days),3)./N_hscale_window - data2D(1,:).^2);
                 data2D(3,:) = nansum(m_data_sum(i,:,1:w_days),3)./N_hscale_window;
                 data2D(4,:) = sqrt(nansum(m_data_sum2(i,:,1:w_days),3)./N_hscale_window - data2D(3,:).^2);
-                data2D(5,:) = N_hscale_window
-                data2D(6,:) = nanmin(m_data_min(i,:,1:w_days),[],3);  % Want to use minimum mean daily value
-                data2D(7,:) = nanmax(m_data_max(i,:,1:w_days),[],3);  % Want to use maximum mean daily value
+                data2D(5,:) = N_hscale_window;
+                data2D(6,:) = min(m_data_min(i,:,1:w_days),[],3);  % Want to use minimum mean daily value
+                data2D(7,:) = max(m_data_max(i,:,1:w_days),[],3);  % Want to use maximum mean daily value
                 
                 data2D([1:Nf],N_hscale_window<Ndata_min) = NaN;
 
@@ -313,7 +313,7 @@ for imonth = 1:length(run_months)
                     else
                         disp(['creating ', fname_out])
                     end
-                    write_netcdf_file_2D_grid(fname_out, i_out, j_out, lon_out, lat_out, inc_angle, data2D, int_Asc, pentad, start_time, end_time, overwrite, Nf, write_ind_latlon, 'scaling', obsnum)
+                    write_netcdf_file_2D_grid_v2(fname_out, i_out, j_out, ll_lons, ll_lats, data2D, pentad, start_time, end_time, overwrite, Nf, ll_lon, ll_lat, d_lon, d_lat)
                 end 
 
                 if mod((DOY + 2),5) == 0
@@ -336,7 +336,7 @@ for imonth = 1:length(run_months)
                         else
                             disp(['creating ', fname_out])
                         end
-                        write_netcdf_file_2D_grid(fname_out, i_out, j_out, lon_out, lat_out, inc_angle, data2D, int_Asc, pentad, start_time, end_time, overwrite, Nf, write_ind_latlon, 'scaling', obsnum)
+                        write_netcdf_file_2D_grid_v2(fname_out, i_out, j_out, ll_lons, ll_lats, data2D, pentad, start_time, end_time, overwrite, Nf, ll_lon, ll_lat, d_lon, d_lat)
                     end
                 end
                 o_data_sum(:,:,1:w_days-1)  = o_data_sum(:,:,2:w_days);
@@ -361,8 +361,6 @@ end % month
 
 % Find the absolute minimum and maximum of the model data over the whole time period
 
-save('data_out_M36_ASCAT_04012015_03312021.mat','data_out', '-v7.3')
-
 if print_all_pentads
     for i = 1:N_species
         data_o = squeeze(data_out(i,:,:,:));
@@ -372,12 +370,10 @@ if print_all_pentads
         else
             fname_out = [fname_out_base_d,'_sp', char(species_names(i)),'_all_pentads.nc4'];
         end
+        
+        save('test_data_out_M36_ASCAT_04012015_03312021.mat', 'fname_out', 'i_out', 'j_out', 'll_lons', 'll_lats', 'data_o', 'start_time_p', 'end_time_p', 'overwrite', 'Nf', 'll_lon', 'll_lat', 'd_lon', 'd_lat', '-v7.3')
 
-        write_netcdf_file_2D_grid(fname_out, i_out, j_out, lon_out, lat_out, ...
-                  inc_angle, data_o, int_Asc, [1:73], ...  
-                  start_time_p, end_time_p, overwrite, ...
-                  Nf, write_ind_latlon, 'scaling',...
-                  obsnum)
+        write_netcdf_file_2D_grid_v2(fname_out, i_out, j_out, ll_lons, ll_lats, data_o, [1:73], start_time_p, end_time_p, overwrite, Nf, ll_lon, ll_lat, d_lon, d_lat)
     end
 end
 
