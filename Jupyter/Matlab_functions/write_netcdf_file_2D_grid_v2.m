@@ -6,6 +6,9 @@ function [] = write_netcdf_file_2D_grid_v2(fname, colind, rowind,...
 int_precision   = 'NC_INT';      % precision of fortran tag
 float_precision = 'NC_DOUBLE';    % precision of data in input file
 
+% Define the compression level (0-9, where 0 is no compression and 9 is maximum compression)
+compression_level = 5;
+
 version = 0;
 
 % check dimensions
@@ -127,30 +130,37 @@ netcdf.putAtt(ncid, varid_lat, 'long_name','loswer left latitude of gridcell');
 netcdf.putAtt(ncid, varid_lat, 'units','degrees_north');
 netcdf.putAtt(ncid, varid_lat, 'axis','Y');
 varid_om = netcdf.defVar(ncid, 'o_mean', float_precision, [dimid_lat dimid_lon dimid_pentad]);
+netcdf.defVarDeflate(ncid,varid_om,true,true,compression_level);
 netcdf.putAtt(ncid, varid_om, 'standard_name','observation mean');
 netcdf.putAtt(ncid, varid_om, 'long_name','Observation mean for pentad calculated over all years for window length');
 netcdf.putAtt(ncid, varid_om, 'units','Degree of saturation (0-1)');
 varid_ov = netcdf.defVar(ncid, 'o_std', float_precision, [dimid_lat dimid_lon dimid_pentad]);
+netcdf.defVarDeflate(ncid,varid_ov,true,true,compression_level);
 netcdf.putAtt(ncid, varid_ov, 'standard_name','observation standard deviation');
 netcdf.putAtt(ncid, varid_ov, 'long_name','Observation standard deviation for pentad calculated over all years for window length');
 netcdf.putAtt(ncid, varid_ov, 'units','Degree of saturation (0-1)');
 varid_mm = netcdf.defVar(ncid, 'm_mean', float_precision, [dimid_lat dimid_lon dimid_pentad]);
+netcdf.defVarDeflate(ncid,varid_mm,true,true,compression_level);
 netcdf.putAtt(ncid, varid_mm, 'standard_name','model mean');
 netcdf.putAtt(ncid, varid_mm, 'long_name','Model mean for pentad calculated over all years for window length');
 netcdf.putAtt(ncid, varid_mm, 'units','Surface soil moisture (m^3 m^-3)'); 
 varid_mv =  netcdf.defVar(ncid, 'm_std', float_precision, [dimid_lat dimid_lon dimid_pentad]);
+netcdf.defVarDeflate(ncid,varid_mv,true,true,compression_level);
 netcdf.putAtt(ncid, varid_mv, 'standard_name','model standard deviation');
 netcdf.putAtt(ncid, varid_mv, 'long_name','Model standard deviation for pentad calculated over all years for window length');
 netcdf.putAtt(ncid, varid_mv, 'units','Surface soil moisture (m^3 m^-3)');
 varid_mi =  netcdf.defVar(ncid, 'm_min', float_precision, [dimid_lat dimid_lon]);
+netcdf.defVarDeflate(ncid,varid_mi,true,true,compression_level);
 netcdf.putAtt(ncid, varid_mi, 'standard_name','model minimum');
 netcdf.putAtt(ncid, varid_mi, 'long_name','Model minimum calculated over all years');
 netcdf.putAtt(ncid, varid_mi, 'units','Surface soil moisture (m^3 m^-3)');
 varid_ma =  netcdf.defVar(ncid, 'm_max', float_precision, [dimid_lat dimid_lon]);
+netcdf.defVarDeflate(ncid,varid_ma,true,true,compression_level);
 netcdf.putAtt(ncid, varid_ma, 'standard_name','model maximum');
 netcdf.putAtt(ncid, varid_ma, 'long_name','Model maximum calculated over all years');
 netcdf.putAtt(ncid, varid_ma, 'units','Surface soil moisture (m^3 m^-3)');
 varid_ndata =  netcdf.defVar(ncid, 'n_data', float_precision, [dimid_lat dimid_lon dimid_pentad]);
+netcdf.defVarDeflate(ncid,varid_ndata,true,true,compression_level);
 netcdf.putAtt(ncid, varid_ndata, 'standard_name','number of data points');
 netcdf.putAtt(ncid, varid_ndata, 'long_name','Number of data points for pentad calculated over all years for window length');
 netcdf.putAtt(ncid, varid_ndata, 'units','1');
@@ -207,18 +217,6 @@ else
     min_data_out = min(min_data,[],3); min_data_out(isnan(min_data_out)) = -9999.;
     netcdf.putVar(ncid,varid_mi,min_data_out); % Min over all pentads, always only 2D
 end
-
-% Define the compression level (0-9, where 0 is no compression and 9 is maximum compression)
-compression_level = 5;
-
-% Compress the variables
-netcdf.defVarDeflate(ncid,varid_om,true,true,compression_level);
-netcdf.defVarDeflate(ncid,varid_ov,true,true,compression_level);
-netcdf.defVarDeflate(ncid,varid_mm,true,true,compression_level);
-netcdf.defVarDeflate(ncid,varid_mv,true,true,compression_level);
-netcdf.defVarDeflate(ncid,varid_mi,true,true,compression_level);
-netcdf.defVarDeflate(ncid,varid_ma,true,true,compression_level);
-netcdf.defVarDeflate(ncid,varid_ndata,true,true,compression_level);
 
 % close netCDF file
 netcdf.close(ncid);
