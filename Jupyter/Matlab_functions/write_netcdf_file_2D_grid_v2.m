@@ -208,6 +208,18 @@ else
     netcdf.putVar(ncid,varid_mi,min_data_out); % Min over all pentads, always only 2D
 end
 
+% Define the compression level (0-9, where 0 is no compression and 9 is maximum compression)
+compression_level = 5;
+
+% Compress the variables
+netcdf.defVarDeflate(ncid,varid_om,true,true,compression_level);
+netcdf.defVarDeflate(ncid,varid_ov,true,true,compression_level);
+netcdf.defVarDeflate(ncid,varid_mm,true,true,compression_level);
+netcdf.defVarDeflate(ncid,varid_mv,true,true,compression_level);
+netcdf.defVarDeflate(ncid,varid_mi,true,true,compression_level);
+netcdf.defVarDeflate(ncid,varid_ma,true,true,compression_level);
+netcdf.defVarDeflate(ncid,varid_ndata,true,true,compression_level);
+
 % close netCDF file
 netcdf.close(ncid);
 
