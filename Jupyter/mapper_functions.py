@@ -124,21 +124,24 @@ def colorbar_info(array):
 
     return cmin, cmax, cmap
 
-def plot_global_contour(lon2d, lat2d, field, saveflag=False, plot_title ='global_plot', units='na'):
+def plot_global_contour(lon2d, lat2d, field, saveflag=False, plot_title ='global_plot', units='na', cmin=None, cmax=None):
 
-    # Check if field has positve and negative values
-    # ----------------------------------------------
-    if np.nanmin(field) < 0:
-          cmax = np.nanmax(np.abs(field))
-          cmin = -cmax
-          cmap = 'RdBu'
+    # Check if cmin and cmax are None
+    if cmin is None:
+        cmin = np.nanmin(field)
+    if cmax is None:
+        cmax = np.nanmax(field)
+
+    # Check if field has positive and negative values
+    if cmin < 0:
+        cmax = np.nanmax(np.abs(field))
+        cmin = -cmax
+        cmap = 'RdBu'
     else:
-          cmax = np.nanmax(field)
-          cmin = np.nanmin(field)
-          cmap = 'nipy_spectral'
+        cmap = 'viridis'
 
-    levels = np.linspace(cmin,cmax,250)
-    levels = np.linspace(0, 1, 50)
+    levels = np.linspace(cmin,cmax,50)
+    #levels = np.linspace(0, 1, 50)
     
     # Create the plot
     fig = plt.figure(figsize=(10, 6))
