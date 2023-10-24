@@ -1,9 +1,9 @@
 
-function [] = get_model_and_obs_clim_stats_pentads_latlon_v2( species_names,              ...
-    run_months, exp_path, exp_run, domain, start_year, end_year,   ...
-    dt_assim, t0_assim, species, combine_species_stats, obs_param, ...
-    hscale, w_days, Ndata_min, prefix )
-
+function [] = get_model_and_obs_clim_stats_pentads_latlon_v2( species_names, ...
+        run_months, exp_path, exp_run, domain, start_year, end_year,         ...
+        dt_assim, t0_assim, species, combine_species_stats, obs_param,       ...
+        resol, w_days, Ndata_min, prefix, print_each_DOY,                    ...
+        print_each_pentad, print_all_pentads,out_dir )
 %
 % get_model_and_obs_clim_stats.m
 %
@@ -19,38 +19,6 @@ function [] = get_model_and_obs_clim_stats_pentads_latlon_v2( species_names,    
 %
 % We calcualte the bias correction factors and write on a regular 0.25 degree 
 % lat/lon grid as there is no regular grid for ASCAT observations
-
-%
-% GDL, aug 2013: added 'convert_grid' (= EASEv2_M36, EASE_M36, ...)
-%                to project the Obs (always M36 for SMOS) and Fcst to M36 
-%                M09 obs are administered by tiles (0) that could be anywhere
-%                around the center of the observed pixel (M36)
-%                -----------
-%                | X X X X |
-%                | X O O X |
-%                | X O O X |
-%                | X X X X |
-%                -----------
-% GDL, jan 2014: the above issue that "any" M09 tile in the center (0)
-%                could potentially administer the M36 obs is not true
-%                anymore with later LDASsa-tags. 
-%                => no need to pass on 'convert_grid' for tags later than
-%                the summer of 2013
-% reichle, qliu, 13 July 2022:
-%                "convert_grid" is still needed to limit the number of tiles
-%                in the scaling parameter file.  With "convert_grid" turned on, 
-%                only the M09 tile to the northeast of the M36 center point 
-%                is kept in the scaling parameter file, consistent with the 
-%                "tmp_shift_lat" and "tmp_shift_lon" operations in the SMOS
-%                and SMAP Fortran readers.  (It is not clear if this matlab 
-%                function works properly if there is no M09 [land] tile 
-%                immediately to the northeast of the M36 center point.  In 
-%                such a case, the Fortran reader assigns the nearest M09
-%                land tile as the tile that administers the obs.)
-%                Presumably, scaling parameters for all M09 tiles could be kept
-%                if they are stored in (compressed) nc4 format.  In this case,
-%                the NaN values for the scaling parameters of 15 out of each 16
-%                M09 tiles can be compressed to almost nothing.
 %
 % -------------------------------------------------------------------
 % begin user-defined inputs
@@ -61,15 +29,6 @@ nodata_tol = 1e-4;
 overwrite = 1;
 Nf = 7;
 N_pentads = 73;
-write_ind_latlon = 'latlon_id';
-print_each_DOY = 0;
-print_each_pentad = 1;
-print_all_pentads = 1;
-
-resol = 0.25;
-
-int_Asc = 3;
-inc_angle = -9999;
 
 disp('ASSUMING ACAT observations/undefined observation grid');
 disp(['Calculating scaling parameters on grid with resolution = ', num2str(resol) , ' degrees']);
@@ -82,7 +41,7 @@ end
 
 inpath  = [ exp_path, '/', exp_run, '/output/', domain ];
 
-outpath = [ inpath, '/stats/z_score_clim_testing' ];
+outpath = [ inpath, '/stats/', out_dir ];
 
 % create outpath if it doesn't exist
 if ~exist(outpath, 'dir')
@@ -104,18 +63,14 @@ end
 D(2) = sum(days_in_month(2014, 1:ma_m));
 P(2) = floor(D(2) / 5);
 
-if run_months(1) ~= run_months(end) && run_months(2) ~= run_months(end)
-    disp('WARNING: incomplete pentad-windows; loop through additional months to get complete pentads');
-end
-
-fname_out_base_d = [outpath,  '/', prefix, ...
+fname_out_base_d = [outpath,  '/', prefix,                ...
     num2str(min(start_year)), '_doy', num2str(D(1)), '_', ...
-    num2str(max(end_year)), '_doy', num2str(D(2)), ...
+    num2str(max(end_year)), '_doy', num2str(D(2)),        ...
     '_W_', num2str(w_days), 'd_Nmin_', num2str(Ndata_min)];
 
-fname_out_base_p = [outpath, '/', prefix, ...
+fname_out_base_p = [outpath, '/', prefix,               ...
     num2str(min(start_year)), '_p', num2str(P(1)), '_', ...
-    num2str(max(end_year)), '_p', num2str(P(2)), ...
+    num2str(max(end_year)), '_p', num2str(P(2)),        ...
     '_W_', num2str(round(w_days/5)), 'p_Nmin_', num2str(Ndata_min)];
 
 %======================================================
@@ -268,27 +223,22 @@ for imonth = 1:length(run_months)
 
             % At the end of each day, collect the obs and fcst of the last
             % w_day period, and write out a statistics-file at [w_day - floor(w_day/2)]
-
             o_data_sum(abs(o_data_sum - nodata) <= nodata_tol) = NaN;
             m_data_sum(abs(m_data_sum - nodata) <= nodata_tol) = NaN;
         
             for i = 1:N_species
-                N_hscale_window = nansum(N_data(i,:,1:w_days),3);
-                if w_days == 95
-                    N_hscale_inner_window = nansum(N_data(i,:,41:55),3);
-                end
+                N_window = nansum(N_data(i,:,1:w_days),3);
                 data2D(1,:) = nansum(o_data_sum(i,:,1:w_days),3);
-                data2D(1,:) = data2D(1,:)./N_hscale_window;
-                data2D(2,:) = sqrt(nansum(o_data_sum2(i,:,1:w_days),3)./N_hscale_window - data2D(1,:).^2);
-                data2D(3,:) = nansum(m_data_sum(i,:,1:w_days),3)./N_hscale_window;
-                data2D(4,:) = sqrt(nansum(m_data_sum2(i,:,1:w_days),3)./N_hscale_window - data2D(3,:).^2);
-                data2D(5,:) = N_hscale_window;
+                data2D(1,:) = data2D(1,:)./N_window;
+                data2D(2,:) = sqrt(nansum(o_data_sum2(i,:,1:w_days),3)./N_window - data2D(1,:).^2);
+                data2D(3,:) = nansum(m_data_sum(i,:,1:w_days),3)./N_window;
+                data2D(4,:) = sqrt(nansum(m_data_sum2(i,:,1:w_days),3)./N_window - data2D(3,:).^2);
+                data2D(5,:) = N_window;
                 data2D(6,:) = min(m_data_min(i,:,1:w_days),[],3);  % Want to use minimum mean daily value
                 data2D(7,:) = max(m_data_max(i,:,1:w_days),[],3);  % Want to use maximum mean daily value
-                
-                data2D([1:Nf],N_hscale_window<Ndata_min) = NaN;
 
-                %data_out(isnan(data_out)) = nodata; % not sure why this here
+                % Set NaNs where there is not enough data
+                data2D([1:Nf],N_window<Ndata_min) = NaN;
 
                 DOY = augment_date_time(-floor(w_days*(24*60*60)/2.0), end_time).dofyr;
                 if(is_leap_year(end_time.year) && DOY>=59)
@@ -298,20 +248,23 @@ for imonth = 1:length(run_months)
 
                 if print_each_DOY
                     if combine_species_stats
-                        fname_out = [fname_out_base_d, '_spALL_DOY', num2str(DOY,'%3.3d'), '.nc4'];
+                        fname_out = [fname_out_base_d, '_sp_ALL_DOY', num2str(DOY,'%3.3d'), '.nc4'];
                     else
-                        fname_out = [fname_out_base_d,'_sp', char(species_names(i)),'_DOY', num2str(DOY,'%3.3d'), '.nc4'];
+                        fname_out = [fname_out_base_d,'_sp_', char(species_names(i)),'_DOY', num2str(DOY,'%3.3d'), '.nc4'];
                     end
                     if (exist(fname_out)==2 && overwrite)
-                        disp(['output file exists. overwriting', fname_out])
+                        disp(['Output file exists. overwriting', fname_out])
                     elseif (exist(fname_out)==2 && ~overwrite) 
-                        disp(['output file exists. not overwriting. returning'])
-                        disp(['writing ', fname_out])
+                        disp(['Output file exists. not overwriting. returning'])
+                        disp(['Writing ', fname_out])
                         return
                     else
-                        disp(['creating ', fname_out])
+                        disp(['Creating ', fname_out])
                     end
-                    write_netcdf_file_2D_grid_v2(fname_out, i_out, j_out, ll_lons, ll_lats, data2D, pentad, start_time, end_time, overwrite, Nf, ll_lon, ll_lat, d_lon, d_lat)
+
+                    % Write out the data
+                    write_netcdf_file_2D_grid_v2( fname_out, i_out, j_out, ll_lons, ll_lats, data2D, pentad, ...
+                                                  start_time, end_time, overwrite, Nf, ll_lon, ll_lat, d_lon, d_lat)
                 end 
 
                 if mod((DOY + 2),5) == 0
@@ -321,22 +274,27 @@ for imonth = 1:length(run_months)
                     end_time_p(pentad) = end_time;
                     if print_each_pentad
                         if combine_species_stats
-                            fname_out = [fname_out_base_p, '_spALL_p', num2str(pentad,'%2.2d'), '.nc4'];
+                            fname_out = [fname_out_base_p, '_sp_ALL_p', num2str(pentad,'%2.2d'), '.nc4'];
                         else
-                            fname_out = [fname_out_base_p, '_sp', char(species_names(i)),'_p', num2str(pentad,'%2.2d'), '.nc4'];
+                            fname_out = [fname_out_base_p, '_sp_', char(species_names(i)),'_p', num2str(pentad,'%2.2d'), '.nc4'];
                         end
                         if (exist(fname_out)==2 && overwrite)
-                            disp(['output file exists. overwriting', fname_out])
+                            disp(['Output file exists. overwriting', fname_out])
                         elseif (exist(fname_out)==2 && ~overwrite) 
-                            disp(['output file exists. not overwriting. returning'])
-                            disp(['writing ', fname_out])
+                            disp(['Output file exists. not overwriting. returning'])
+                            disp(['Writing ', fname_out])
                             return
                         else
-                            disp(['creating ', fname_out])
+                            disp(['Creating ', fname_out])
                         end
-                        write_netcdf_file_2D_grid_v2(fname_out, i_out, j_out, ll_lons, ll_lats, data2D, pentad, start_time, end_time, overwrite, Nf, ll_lon, ll_lat, d_lon, d_lat)
+
+                        % Write out the data
+                        write_netcdf_file_2D_grid_v2( fname_out, i_out, j_out, ll_lons, ll_lats, data2D, pentad, ...
+                                                      start_time, end_time, overwrite, Nf, ll_lon, ll_lat, d_lon, d_lat )
                     end
                 end
+
+                % Shift the data in the window to make room for next day
                 o_data_sum(i,:,1:w_days-1)  = o_data_sum(i,:,2:w_days);
                 m_data_sum(i,:,1:w_days-1)  = m_data_sum(i,:,2:w_days);
                 o_data_sum2(i,:,1:w_days-1) = o_data_sum2(i,:,2:w_days);
@@ -357,21 +315,28 @@ for imonth = 1:length(run_months)
     end % day
 end % month
 
-% Find the absolute minimum and maximum of the model data over the whole time period
-
 if print_all_pentads
     for i = 1:N_species
         data_o = squeeze(data_out(i,:,:,:));
 
         if combine_species_stats
-            fname_out = [fname_out_base_d, '_spALL_all_pentads.nc4'];
+            fname_out = [fname_out_base_d, '_sp_ALL_all_pentads.nc4'];
         else
-            fname_out = [fname_out_base_d,'_sp', char(species_names(i)),'_all_pentads.nc4'];
+            fname_out = [fname_out_base_d,'_sp_', char(species_names(i)),'_all_pentads.nc4'];
         end
-        
-        save('test_data_out_M36_ASCAT_04012015_03312021.mat', 'fname_out', 'i_out', 'j_out', 'll_lons', 'll_lats', 'data_o', 'start_time_p', 'end_time_p', 'overwrite', 'Nf', 'll_lon', 'll_lat', 'd_lon', 'd_lat', '-v7.3')
 
-        write_netcdf_file_2D_grid_v2(fname_out, i_out, j_out, ll_lons, ll_lats, data_o, [1:73], start_time_p, end_time_p, overwrite, Nf, ll_lon, ll_lat, d_lon, d_lat)
+        if (exist(fname_out)==2 && overwrite)
+            disp(['Output file exists. overwriting', fname_out])
+        elseif (exist(fname_out)==2 && ~overwrite) 
+            disp(['Output file exists. not overwriting. returning'])
+            disp(['Writing ', fname_out])
+            return
+        else
+            disp(['Creating ', fname_out])
+        end
+
+        write_netcdf_file_2D_grid_v2( fname_out, i_out, j_out, ll_lons, ll_lats, data_o, [1:73], ...
+                              start_time_p, end_time_p, overwrite, Nf, ll_lon, ll_lat, d_lon, d_lat )
     end
 end
 
