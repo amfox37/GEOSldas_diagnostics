@@ -82,7 +82,7 @@ end
 
 inpath  = [ exp_path, '/', exp_run, '/output/', domain ];
 
-outpath = [ inpath, '/stats/z_score_clim_db' ];
+outpath = [ inpath, '/stats/z_score_clim_testing' ];
 
 % create outpath if it doesn't exist
 if ~exist(outpath, 'dir')
@@ -218,8 +218,8 @@ for imonth = 1:length(run_months)
 
                         if combine_species_stats
                             ind = find(ismember(obs_species, species));
-                            this_species = species(scnt);
                         else
+                            this_species = species(scnt);
                             ind = find(obs_species == this_species);
                         end
 
@@ -271,8 +271,6 @@ for imonth = 1:length(run_months)
 
             o_data_sum(abs(o_data_sum - nodata) <= nodata_tol) = NaN;
             m_data_sum(abs(m_data_sum - nodata) <= nodata_tol) = NaN;
-
-            % data_out = zeros(N_out_fields,1:N_tiles,N_angle);
         
             for i = 1:N_species
                 N_hscale_window = nansum(N_data(i,:,1:w_days),3);
@@ -290,7 +288,7 @@ for imonth = 1:length(run_months)
                 
                 data2D([1:Nf],N_hscale_window<Ndata_min) = NaN;
 
-                data_out(isnan(data_out)) = nodata; % not sure why this here
+                %data_out(isnan(data_out)) = nodata; % not sure why this here
 
                 DOY = augment_date_time(-floor(w_days*(24*60*60)/2.0), end_time).dofyr;
                 if(is_leap_year(end_time.year) && DOY>=59)
@@ -339,20 +337,20 @@ for imonth = 1:length(run_months)
                         write_netcdf_file_2D_grid_v2(fname_out, i_out, j_out, ll_lons, ll_lats, data2D, pentad, start_time, end_time, overwrite, Nf, ll_lon, ll_lat, d_lon, d_lat)
                     end
                 end
-                o_data_sum(:,:,1:w_days-1)  = o_data_sum(:,:,2:w_days);
-                m_data_sum(:,:,1:w_days-1)  = m_data_sum(:,:,2:w_days);
-                o_data_sum2(:,:,1:w_days-1) = o_data_sum2(:,:,2:w_days);
-                m_data_sum2(:,:,1:w_days-1) = m_data_sum2(:,:,2:w_days);
-                m_data_min(:,:,1:w_days-1) = m_data_min(:,:,2:w_days);
-                m_data_max(:,:,1:w_days-1) = m_data_max(:,:,2:w_days);
-                N_data(:,:,1:w_days-1)  = N_data(:,:,2:w_days);
-                o_data_sum(:,:,w_days)  = NaN;
-                m_data_sum(:,:,w_days)  = NaN;
-                o_data_sum2(:,:,w_days) = NaN;
-                m_data_sum2(:,:,w_days) = NaN;
-                m_data_min(:,:,w_days) = NaN;
-                m_data_max(:,:,w_days) = NaN;
-                N_data(:,:,w_days)  = NaN;
+                o_data_sum(i,:,1:w_days-1)  = o_data_sum(i,:,2:w_days);
+                m_data_sum(i,:,1:w_days-1)  = m_data_sum(i,:,2:w_days);
+                o_data_sum2(i,:,1:w_days-1) = o_data_sum2(i,:,2:w_days);
+                m_data_sum2(i,:,1:w_days-1) = m_data_sum2(i,:,2:w_days);
+                m_data_min(i,:,1:w_days-1) = m_data_min(i,:,2:w_days);
+                m_data_max(i,:,1:w_days-1) = m_data_max(i,:,2:w_days);
+                N_data(i,:,1:w_days-1)  = N_data(i,:,2:w_days);
+                o_data_sum(i,:,w_days)  = NaN;
+                m_data_sum(i,:,w_days)  = NaN;
+                o_data_sum2(i,:,w_days) = NaN;
+                m_data_sum2(i,:,w_days) = NaN;
+                m_data_min(i,:,w_days) = NaN;
+                m_data_max(i,:,w_days) = NaN;
+                N_data(i,:,w_days)  = NaN;
                 data2D = NaN+0.0.*data2D;
             end              
         end % count >= w_days

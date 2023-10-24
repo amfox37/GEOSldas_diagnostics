@@ -8,7 +8,7 @@ exp_path = '/discover/nobackup/amfox/Experiments/OLv7_M36_ascat';
 exp_run  = {'OLv7_M36_ascat'};
 domain   = 'SMAP_EASEv2_M36_GLOBAL';
 start_year = [repmat(2016,1,3) repmat(2015,1,9) repmat(2016,1,3) repmat(2015,1,1)]; % A bit wierd, try to improve later
-end_year   = [repmat(2021,1,3) repmat(2020,1,9) repmat(2021,1,3) repmat(2020,1,1)];
+end_year   = [repmat(2017,1,3) repmat(2016,1,9) repmat(2017,1,3) repmat(2016,1,1)];
 prefix_out = 'M36_zscore_stats_';
 dt_assim   = 3*60*60;
 t0_assim   = 0;
@@ -30,7 +30,7 @@ for i = 1:length(species_names)
 end
 
 if combine_species_stats
-    disp('Calculating stats by combining muiltiple species');
+    disp('Calculating stats by combining multiple species');
 end
 
 get_model_and_obs_clim_stats_pentads_latlon_v2(species_names, run_months, exp_path, exp_run{1}, domain, start_year, end_year, dt_assim, t0_assim, species, combine_species_stats, obs_param, hscale, w_days, Ndata_min, prefix_out);
