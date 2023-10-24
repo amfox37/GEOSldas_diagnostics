@@ -58,6 +58,9 @@ out_dir = 'z_score_clim_testing';
 run_months = [1:12 1:ceil(w_days/30)];
 
 % Calculate the earliest and latest years for each month in the experiment
+earliest_year = zeros(length(run_months),1);
+latest_year   = zeros(length(run_months),1);
+
 cnt = 0;
 for month = run_months
     % Initialize the earliest and latest year variables
