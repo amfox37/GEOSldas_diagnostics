@@ -3,3 +3,7 @@
 *.png
 .DS_Store
 test_data/*
+*.npz
+Jupyter/.ipynb_checkpoints/*
+*.nc
+*.nc4
