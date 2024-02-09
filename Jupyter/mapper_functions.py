@@ -26,6 +26,7 @@ def plot_global(array, saveflag=False, plot_title ='global_plot', units='na'):
     ax.tick_params(labelbottom=False, labeltop=False, labelleft=False, labelright=False)
 
     ax.set_global()
+    ax.add_feature(cfeature.LAND, facecolor='lightgray')  # Set the land color to light gray
     ax.add_feature(cfeature.COASTLINE)
     #ax.add_feature(cfeature.BORDERS)
 
@@ -75,6 +76,7 @@ def plot_na(array, saveflag=False, plot_title ='na_plot', units='na'):
     ax.tick_params(labelbottom=False, labeltop=False, labelleft=False, labelright=False)
 
     ax.coastlines()
+    ax.add_feature(cfeature.LAND, facecolor='lightgray')  # Set the land color to light gray
     ax.add_feature(cfeature.BORDERS)
 
     # scatter data
@@ -134,8 +136,8 @@ def plot_global_contour(lon2d, lat2d, field, saveflag=False, plot_title ='global
 
     # Check if field has positive and negative values
     if cmin < 0:
-        cmax = np.nanmax(np.abs(field))
-        cmin = -cmax
+    #    cmax = np.nanmax(np.abs(field))
+    #    cmin = -cmax
         cmap = 'RdBu'
     else:
         cmap = 'viridis'
@@ -155,6 +157,7 @@ def plot_global_contour(lon2d, lat2d, field, saveflag=False, plot_title ='global
     ax.tick_params(labelbottom=False, labeltop=False, labelleft=False, labelright=False)
 
     ax.set_global()
+    ax.add_feature(cfeature.LAND, facecolor='lightgray')  # Set the land color to light gray
     ax.add_feature(cfeature.COASTLINE)
     #ax.add_feature(cfeature.BORDERS)
 
