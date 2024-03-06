@@ -63,6 +63,7 @@ def plot_global_tight(array, saveflag=False, plot_title ='global_plot', units='n
     if cmap is None:
         if cmin < 0:
             cmap = 'RdYlBu_r'
+            cmap = plt.get_cmap('RdBu', 16)
         else:
             cmap = 'viridis'        
     
@@ -74,12 +75,12 @@ def plot_global_tight(array, saveflag=False, plot_title ='global_plot', units='n
     ax.set_extent([-180, 180, -60, 90], crs=ccrs.PlateCarree())
 
     # plot grid lines
-    gl = ax.gridlines(crs=ccrs.PlateCarree(central_longitude=0), draw_labels=False,
+    gl = ax.gridlines(crs=ccrs.PlateCarree(central_longitude=0), draw_labels=True,
                           linewidth=1, color='gray', alpha=0.5, linestyle='-')
     gl.xlabel_style = {'size': 5, 'color': 'black'}
     gl.ylabel_style = {'size': 5, 'color': 'black'}
     gl.xlocator = mticker.FixedLocator([-180, -135, -90, -45, 0, 45, 90, 135, 179.9])
-    # ax.tick_params(labelbottom=False, labeltop=False, labelleft=False, labelright=False)
+    ax.tick_params(labelbottom=False, labeltop=False, labelleft=False, labelright=False)
 
     # ax.set_global()
     ax.add_feature(cfeature.LAND, facecolor='lightgrey')  # Set the land color to light gray
