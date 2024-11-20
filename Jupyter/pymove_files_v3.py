@@ -16,6 +16,9 @@ for sat in satellites:
 # These files have names like "W_XX-EUMETSAT-Darmstadt,SOUNDING+SATELLITE,METOPB+ASCAT_C_EUMP_20230930011800_57245_eps_o_250_ssm_l2.bin" 
 
 for root, dirs, files in os.walk(dir_path):
+    # Remove any duplicate files in the files list
+    files = list(set(files))
+    
     for file in files:
         if file.startswith('W_XX-EUMETSAT-Darmstadt,SOUNDING+SATELLITE,METOP'):
             # Extract the satellite name from the file name
