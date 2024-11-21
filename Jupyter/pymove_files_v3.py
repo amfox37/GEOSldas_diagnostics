@@ -16,9 +16,7 @@ for sat in satellites:
 # These files have names like "W_XX-EUMETSAT-Darmstadt,SOUNDING+SATELLITE,METOPB+ASCAT_C_EUMP_20230930011800_57245_eps_o_250_ssm_l2.bin" 
 
 for root, dirs, files in os.walk(dir_path):
-    # Remove any duplicate files in the files list
-    files = list(set(files))
-    
+
     for file in files:
         if file.startswith('W_XX-EUMETSAT-Darmstadt,SOUNDING+SATELLITE,METOP'):
             # Extract the satellite name from the file name
@@ -59,6 +57,10 @@ for root, dirs, files in os.walk(dir_path):
                 sat_code = 'M03'
 
             symlink_name = sat_code + '-ASCA-ASCSMO02-NA-5.0-' + timestamp + '.bfr'
+
+            # We need to remove the existing symlink if it exists (might have duplicate files)
+            if os.path.exists(os.path.join(month_dir, symlink_name)):
+                os.remove(os.path.join(month_dir, symlink_name))
 
             os.symlink(os.path.join(month_dir, file), os.path.join(month_dir, symlink_name))
 
