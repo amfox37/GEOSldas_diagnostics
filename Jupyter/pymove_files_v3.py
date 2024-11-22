@@ -62,6 +62,7 @@ for root, dirs, files in os.walk(dir_path):
             if os.path.exists(os.path.join(month_dir, symlink_name)):
                 os.remove(os.path.join(month_dir, symlink_name))
 
-            os.symlink(os.path.join(month_dir, file), os.path.join(month_dir, symlink_name))
+            relative_path = os.path.relpath(os.path.join(month_dir, file), month_dir)
+            os.symlink(relative_path, os.path.join(month_dir, symlink_name))
 
 print("Files moved successfully!")
