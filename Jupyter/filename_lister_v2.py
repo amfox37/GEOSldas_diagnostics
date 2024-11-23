@@ -1,10 +1,10 @@
 import os
 import calendar
 
-top_directory = "../test_data/Metop_B"  # Specify the top directory
-out_directory = "../test_data/fnames_v2"  # Specify the top output directory
-start_year = 2015  # Specify the start year
-end_year = 2022  # Specify the end year
+top_directory = "/discover/nobackup/projects/gmao/smap/SMAP_Nature/ASCAT_EUMETSAT/Metop_A"  # Specify the top directory
+out_directory = "/discover/nobackup/amfox/ASCAT_fname_lists_v2"  # Specify the top output directory
+start_year = 2007  # Specify the start year
+end_year = 2024  # Specify the end year
 
 def parse_timestamp(timestamp):
     if len(timestamp) < 14:
@@ -31,13 +31,13 @@ def search_and_copy_files():
             _, num_days = calendar.monthrange(year, month)  # Get the actual number of days in the month
             for day in range(1, num_days + 1):
                 destination_directory = create_directory(year, month, day)
-                destination_file = os.path.join(destination_directory, "M01-ASCA-ASCSMO02.txt")
+                destination_file = os.path.join(destination_directory, "M02-ASCA-ASCSMO02.txt")
                 with open(destination_file, "w") as f:  # Create an empty file
                     pass
                 directory = os.path.join(top_directory, "Y{:04d}".format(year), "M{:02d}".format(month))
                 if os.path.isdir(directory):
                     for filename in os.listdir(directory):
-                        if filename.startswith("M01-ASCA-ASCSMO02-NA-"):
+                        if filename.startswith("M02-ASCA-ASCSMO02-NA-"):
                             timestamp = filename.split("-")[5]
                             file_year, file_month, file_day, _, _, _ = parse_timestamp(timestamp)
                             if file_year != year or file_month != month or file_day != day:
