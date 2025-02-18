@@ -388,7 +388,7 @@ def plot_global_tight_pcm(array, saveflag=False, meanflag=False, plot_title ='gl
      # Show the plot
     plt.show()
 
-    def plot_aus_tight_pcm(array, saveflag=False, meanflag=False, plot_title ='global_plot', units='na', cmin=None, cmax=None, cmap=None):
+def plot_aus_tight_pcm(array, saveflag=False, meanflag=False, plot_title ='global_plot', units='na', cmin=None, cmax=None, cmap=None):
 
     # Read binary files and reshape to correct size
     # The number of rows and columns are in the file name
