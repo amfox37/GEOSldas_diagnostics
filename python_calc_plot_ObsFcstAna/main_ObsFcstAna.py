@@ -50,12 +50,12 @@ import io
 sys.stdout = io.TextIOWrapper(open(sys.stdout.fileno(), 'wb', 0), write_through=True)
 sys.stderr = io.TextIOWrapper(open(sys.stderr.fileno(), 'wb', 0), write_through=True)
 
-expdir = '/gpfsm/dnb05/projects/p51/SMAP_Nature/'
-expid = 'SPL4SM_Vv8010'
-domain = 'SMAP_EASEv2_M09_GLOBAL'
+expdir = '/discover/nobackup/projects/land_da/CYGNSS_Experiments/DAv8_M36_Aus/'
+expid = 'DAv8_M36_Aus'
+domain = 'SMAP_EASEv2_M36_GLOBAL'
 
-start_time = datetime(2015,4,1)
-end_time = datetime(2021,4,1)
+start_time = datetime(2018,8,1)
+end_time = datetime(2024,7,1)
 
 # Define a minimum threshold for the temporal data points to ensure statistical reliability
 # of the computed metrics. 
@@ -63,21 +63,29 @@ Nmin = 20
 
 # Base directory for storing monthly files
 # This can be the same as the experiment directory (expdir) or a different location
-out_path_mo = '/discover/nobackup/qliu/SMAP_diag/' +expid+'/output/'+domain+'/ana/ens_avg/'
+out_path_mo = os.path.join(expdir, expid, 'output', domain, 'ana', 'ens_avg')
+
+print(out_path_mo)
 
 # Directory for diagnostic plots
-out_path = '/discover/nobackup/qliu/SMAP_diag/'
+out_path = './figures/'
 make_folder(out_path)
 
 # Variable list for computing sum and sum of squared
 var_list = ['obs_obs', 'obs_obsvar','obs_fcst','obs_fcstvar','obs_ana','obs_anavar']
 
 # Read tilecoord and obsparam for tile and obs species information
-ftc = expdir+expid+'/output/'+domain+'/rc_out/'+expid+'.ldas_tilecoord.bin'
+ftc = os.path.join(expdir, expid, 'output', domain, 'rc_out', f'{expid}.ldas_tilecoord.bin')
 tc = read_tilecoord(ftc)
 n_tile = tc['N_tile']
 
-fop = expdir+expid+'/output/'+domain+'/rc_out/Y2015/M04/'+expid+'.ldas_obsparam.20150401_0000z.txt'
+# Construct the file path dynamically using start_time
+fop = os.path.join(
+    expdir, expid, 'output', domain, 'rc_out',
+    'Y' + start_time.strftime('%Y'),
+    'M' + start_time.strftime('%m'),
+    f"{expid}.ldas_obsparam.{start_time.strftime('%Y%m%d')}_0000z.txt"
+)
 obs_param = read_obs_param(fop)
 n_spec = len(obs_param)
 

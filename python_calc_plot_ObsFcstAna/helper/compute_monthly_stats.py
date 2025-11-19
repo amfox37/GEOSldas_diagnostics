@@ -34,7 +34,7 @@ def compute_monthly_stats(expdir,expid,domain,this_month,tc,obs_param,var_list):
 
         OFA = read_ObsFcstAna(fname)
 
-        if len(OFA['obs_tilenum'] > 0):
+        if len(OFA['obs_tilenum']) > 0:
             # Initialize full size variable to keep values
             data_tile={}
             for var in var_list:
@@ -53,7 +53,13 @@ def compute_monthly_stats(expdir,expid,domain,this_month,tc,obs_param,var_list):
                     for var in var_list:
                         masked_data[var] = OFA[var][OFA['obs_species'] == this_species]          
      
-                tile_idx = np.where(np.isin(tc['tile_id'], masked_tilenum))[0]
+                # Convert to 0-based indices for tc array
+                tile_indices = masked_tilenum - 1
+        
+                # Get corresponding tc tile IDs
+                tc_tile_ids = tc['tile_id'][tile_indices]
+
+                tile_idx = np.where(np.isin(tc['tile_id'], tc_tile_ids))[0]
 
                 for var in var_list:
                     data_tile[var][tile_idx, ispec] = masked_data[var]         

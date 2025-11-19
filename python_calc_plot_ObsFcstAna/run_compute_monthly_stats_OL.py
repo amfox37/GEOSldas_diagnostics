@@ -52,15 +52,15 @@ import io
 sys.stdout = io.TextIOWrapper(open(sys.stdout.fileno(), 'wb', 0), write_through=True)
 sys.stderr = io.TextIOWrapper(open(sys.stderr.fileno(), 'wb', 0), write_through=True)
 
-expdir = '/discover/nobackup/projects/land_da/Experiment_archive/M21C_land_sweeper_OLv8_M36/'
-expid = 'LS_OLv8_M36'
+expdir = '/discover/nobackup/projects/land_da/CYGNSS_Experiments/OLv8_M36_Aus/'
+expid = 'OLv8_M36_Aus'
 domain = 'SMAP_EASEv2_M36_GLOBAL'
 
-da_expdir='/discover/nobackup/projects/land_da/Experiment_archive/M21C_land_sweeper_DAv8_M36/'
-da_expid='LS_DAv8_M36'
+da_expdir='/discover/nobackup/projects/land_da/CYGNSS_Experiments/DAv8_M36_Aus/'
+da_expid='DAv8_M36_Aus'
 
-start_time = datetime(2000,6,1)
-end_time = datetime(2024,4,1)
+start_time = datetime(2018,8,1)
+end_time = datetime(2024,7,1)
 
 # Define a minimum threshold for the temporal data points to ensure statistical reliability
 # of the computed metrics. 
@@ -68,11 +68,7 @@ Nmin = 20
 
 # Base directory for storing monthly files
 # This can be the same as the experiment directory (expdir) or a different location
-out_path_mo = '/discover/nobackup/qliu/SMAP_diag/' +expid+'/output/'+domain+'/ana/ens_avg/'
-
-# Directory for diagnostic plots
-out_path = '/discover/nobackup/qliu/SMAP_diag/'
-make_folder(out_path)
+out_path_mo = expdir+expid+'/output/'+domain+'/ana/ens_avg/'
 
 # Variable list for computing sum and sum of squared
 var_list = ['obs_obs', 'obs_obsvar','obs_fcst','obs_fcstvar','obs_ana','obs_anavar']
@@ -82,7 +78,7 @@ ftc = expdir+expid+'/output/'+domain+'/rc_out/'+expid+'.ldas_tilecoord.bin'
 tc = read_tilecoord(ftc)
 n_tile = tc['N_tile']
 
-fop = expdir+expid+'/output/'+domain+'/rc_out/Y2015/M04/'+expid+'.ldas_obsparam.20150401_0000z.txt'
+fop = expdir+expid+'/output/'+domain+'/rc_out/Y2018/M08/'+expid+'.ldas_obsparam.20180801_0000z.txt'
 obs_param = read_obs_param(fop)
 n_spec = len(obs_param)
 
@@ -105,7 +101,7 @@ while date_time < end_time:
     fout_path = out_path_mo + '/Y'+ date_time.strftime('%Y') + '/M' + date_time.strftime('%m') + '/'
     make_folder(fout_path)
     
-    fout = fout_path + expid+'.ens_avg.ldas_ObsFcstAna.' + date_time.strftime('%Y%m') +'_stats.nc4'
+    fout = fout_path + expid+'.ens_avg.ldas_ObsFcstAna.' + date_time.strftime('%Y%m') +'_stats_CROSSMASKED.nc4'
 
     # Read monthly data if file exists, otherwise compute monthly statistics first   
     if os.path.isfile(fout):

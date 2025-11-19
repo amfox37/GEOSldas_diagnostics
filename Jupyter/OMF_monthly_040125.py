@@ -9,13 +9,13 @@ from dateutil.relativedelta import relativedelta
 expt_name = 'LS_DAv8_M36'
 
 # Define the path directory
-path = f'/Users/amfox/Desktop/GEOSldas_diagnostics/test_data/land_sweeper/{expt_name}/output/SMAP_EASEv2_M36_GLOBAL/ana/ens_avg'
+path = f'/discover/nobackup/projects/land_da/Experiment_archive/M21C_land_sweeper_DAv8_M36/{expt_name}/output/SMAP_EASEv2_M36_GLOBAL/ana/ens_avg'
 
 # Define the common file name start
 file_name_start = f'{expt_name}.ens_avg.ldas_ObsFcstAna.'
 
-start_date = datetime(2020, 1, 1)
-end_date = datetime(2020, 3, 1)
+start_date = datetime(2000, 6, 1)
+end_date   = datetime(2024, 4, 1)
 
 start_date_str = start_date.strftime('%Y%m%d')
 end_date_str = end_date.strftime('%Y%m%d')
@@ -173,7 +173,7 @@ current_date = start_date
 while current_date <= end_date:
     # Define the file name for the current date
     file_name = file_name_start + current_date.strftime('%Y%m')
-    
+
     # Call the read_obsfcstana function for the current file
     try:
         obs_assim, species, tilenum, lon, lat, obs, obsvar, fcst, fcstvar, ana, anavar = read_obsfcstana_no_datetime(path, file_name, printflag)
@@ -185,7 +185,6 @@ while current_date <= end_date:
         print(f"Error processing file {file_name}: {e}")
         current_date += relativedelta(months=1)
         continue
-    # Initialize arrays
 
     # Use obs_assim as a mask, obs_assim = 1 means assimilated
     obs_assim = obs_assim.ravel()
@@ -197,6 +196,10 @@ while current_date <= end_date:
     fcst = fcst[obs_assim == 1]
     ana = ana[obs_assim == 1]    
 
+    # Print the number of unique tilenum values
+    print(f"Read obs for: {current_date.strftime('%Y%m')}")
+
+    # Initialize arrays 
     obs_cnt  = np.zeros((max_tilenum + 1, max_speciesnum + 1))
     obs_sum  = np.zeros((max_tilenum + 1, max_speciesnum + 1))
     obs2_sum = np.zeros((max_tilenum + 1, max_speciesnum + 1))
@@ -222,9 +225,6 @@ while current_date <= end_date:
 
     # Find the number of unique tilenum values
     num_unique_tilenum = len(unique_tilenum)
-
-    # Print the number of unique tilenum values
-    print(f"Read obs for: {current_date.strftime('%Y%m')}")
 
     # Sort the arrays based on tilenum
     sort_indices = np.argsort(tilenum)

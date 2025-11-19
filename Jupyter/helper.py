@@ -37,7 +37,7 @@ def read_ObsFcstAna(fname, isLDASsa=False):
     machfmt = '>' if isLDASsa else '<'  # '>' for big-endian, '<' for little-endian
 
     if os.path.exists(fname):
-        print(f"reading from {fname}")
+        # print(f"reading from {fname}")
 
         with open(fname, 'rb') as ifp:
             # Read N_obs and time stamp entry

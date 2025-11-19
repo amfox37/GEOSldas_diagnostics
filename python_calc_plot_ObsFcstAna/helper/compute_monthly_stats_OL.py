@@ -110,7 +110,13 @@ def compute_monthly_stats_OL(expdir, expid, domain, this_month, tc, obs_param, v
                     if var != 'obs_obs':
                         masked_data[var] = OFA[var][mask][matched_idx]
 
-                tile_idx = np.where(np.isin(tc['tile_id'], masked_tilenum))[0]
+                # Convert to 0-based indices for tc array
+                tile_indices = masked_tilenum - 1
+        
+                # Get corresponding tc tile IDs
+                tc_tile_ids = tc['tile_id'][tile_indices]
+
+                tile_idx = np.where(np.isin(tc['tile_id'], tc_tile_ids))[0]
 
                 for var in var_list:
                     data_tile[var][tile_idx, ispec] = masked_data[var]
